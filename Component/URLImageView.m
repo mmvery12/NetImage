@@ -42,13 +42,6 @@
     self.operation = opertation;
 }
 
-
--(void)setOperation:(NSOperation *)operation
-{
-    _operation = operation;
-    _objIsa = object_getClass(_operation);
-}
-
 -(void)imageDone:(UIImage *)image memory:(BOOL)memory
 {
     self.image = image;
@@ -60,6 +53,14 @@
         }];
     }
 }
+
+-(void)setOperation:(NSOperation *)operation
+{
+    _operation = operation;
+    _objIsa = object_getClass(_operation);
+}
+
+
 
 -(void)cancelOperation
 {

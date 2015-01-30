@@ -51,6 +51,9 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
+    NSDictionary *dict = ((NSHTTPURLResponse *)response).allHeaderFields;
+    NSString *ContentType = [dict objectForKey:@"Content-Type"];
+    
     totalSize = response.expectedContentLength;
 }
 
