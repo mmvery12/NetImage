@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		20355E3E1A7B863F00744C83 /* URLImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 20355E3B1A7B863F00744C83 /* URLImage.m */; };
+		20355E3F1A7B863F00744C83 /* URLImageLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 20355E3D1A7B863F00744C83 /* URLImageLayer.m */; };
 		20D17FE91A78D3A600C52D5D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D17FE81A78D3A600C52D5D /* main.m */; };
 		20D17FEC1A78D3A600C52D5D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D17FEB1A78D3A600C52D5D /* AppDelegate.m */; };
 		20D17FEF1A78D3A600C52D5D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D17FEE1A78D3A600C52D5D /* ViewController.m */; };
@@ -14,7 +16,6 @@
 		20D17FF41A78D3A600C52D5D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20D17FF31A78D3A600C52D5D /* Images.xcassets */; };
 		20D17FF71A78D3A600C52D5D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 20D17FF51A78D3A600C52D5D /* LaunchScreen.xib */; };
 		20D180031A78D3A600C52D5D /* NetImageTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D180021A78D3A600C52D5D /* NetImageTests.m */; };
-		20D180161A78D3C900C52D5D /* defaultImage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 20D1800D1A78D3C900C52D5D /* defaultImage@2x.png */; };
 		20D180171A78D3C900C52D5D /* ImageDataPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D1800F1A78D3C900C52D5D /* ImageDataPool.m */; };
 		20D180181A78D3C900C52D5D /* URLImageOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D180111A78D3C900C52D5D /* URLImageOperation.m */; };
 		20D180191A78D3C900C52D5D /* URLImageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 20D180131A78D3C900C52D5D /* URLImageQueue.m */; };
@@ -32,6 +33,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		20355E3A1A7B863F00744C83 /* URLImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = URLImage.h; sourceTree = "<group>"; };
+		20355E3B1A7B863F00744C83 /* URLImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = URLImage.m; sourceTree = "<group>"; };
+		20355E3C1A7B863F00744C83 /* URLImageLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = URLImageLayer.h; sourceTree = "<group>"; };
+		20355E3D1A7B863F00744C83 /* URLImageLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = URLImageLayer.m; sourceTree = "<group>"; };
 		20D17FE31A78D3A600C52D5D /* NetImage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetImage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		20D17FE71A78D3A600C52D5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20D17FE81A78D3A600C52D5D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -45,7 +50,6 @@
 		20D17FFC1A78D3A600C52D5D /* NetImageTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NetImageTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20D180011A78D3A600C52D5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20D180021A78D3A600C52D5D /* NetImageTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NetImageTests.m; sourceTree = "<group>"; };
-		20D1800D1A78D3C900C52D5D /* defaultImage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "defaultImage@2x.png"; sourceTree = "<group>"; };
 		20D1800E1A78D3C900C52D5D /* ImageDataPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageDataPool.h; sourceTree = "<group>"; };
 		20D1800F1A78D3C900C52D5D /* ImageDataPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageDataPool.m; sourceTree = "<group>"; };
 		20D180101A78D3C900C52D5D /* URLImageOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = URLImageOperation.h; sourceTree = "<group>"; };
@@ -138,8 +142,11 @@
 		20D1800C1A78D3C900C52D5D /* Component */ = {
 			isa = PBXGroup;
 			children = (
+				20355E3A1A7B863F00744C83 /* URLImage.h */,
+				20355E3B1A7B863F00744C83 /* URLImage.m */,
+				20355E3C1A7B863F00744C83 /* URLImageLayer.h */,
+				20355E3D1A7B863F00744C83 /* URLImageLayer.m */,
 				20D1801B1A78D42F00C52D5D /* SysAsseist.h */,
-				20D1800D1A78D3C900C52D5D /* defaultImage@2x.png */,
 				20D1800E1A78D3C900C52D5D /* ImageDataPool.h */,
 				20D1800F1A78D3C900C52D5D /* ImageDataPool.m */,
 				20D180101A78D3C900C52D5D /* URLImageOperation.h */,
@@ -232,7 +239,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				20D180161A78D3C900C52D5D /* defaultImage@2x.png in Resources */,
 				20D17FF21A78D3A600C52D5D /* Main.storyboard in Resources */,
 				20D17FF71A78D3A600C52D5D /* LaunchScreen.xib in Resources */,
 				20D17FF41A78D3A600C52D5D /* Images.xcassets in Resources */,
@@ -256,7 +262,9 @@
 				20D17FEF1A78D3A600C52D5D /* ViewController.m in Sources */,
 				20D180171A78D3C900C52D5D /* ImageDataPool.m in Sources */,
 				20D1801A1A78D3C900C52D5D /* URLImageView.m in Sources */,
+				20355E3E1A7B863F00744C83 /* URLImage.m in Sources */,
 				20D17FEC1A78D3A600C52D5D /* AppDelegate.m in Sources */,
+				20355E3F1A7B863F00744C83 /* URLImageLayer.m in Sources */,
 				20D180181A78D3C900C52D5D /* URLImageOperation.m in Sources */,
 				20D17FE91A78D3A600C52D5D /* main.m in Sources */,
 				20D180191A78D3C900C52D5D /* URLImageQueue.m in Sources */,
@@ -450,6 +458,7 @@
 				20D180081A78D3A600C52D5D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		20D180091A78D3A600C52D5D /* Build configuration list for PBXNativeTarget "NetImageTests" */ = {
 			isa = XCConfigurationList;
@@ -458,6 +467,7 @@
 				20D1800B1A78D3A600C52D5D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

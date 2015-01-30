@@ -9,9 +9,11 @@
 #import <UIKit/UIKit.h>
 @interface URLImageView : UIImageView
 @property (nonatomic,assign,readonly) CGFloat percent;
-@property (nonatomic,retain) NSIndexPath *indexPath;
-@property (nonatomic,assign)BOOL useCache;
 -(void)urlImage:(NSString *)url;
 -(void)urlImage:(NSString *)url defaultIMG:(NSString *)img;
--(void)urlImage:(NSString *)url largeUrl:(NSString *)large defaultIMG:(NSString *)img;
+@property (nonatomic,retain) NSIndexPath *indexPath;
+@end
+
+@interface URLImageView (GIFImage)
+- (void)pauseGif;
 @end

@@ -10,17 +10,16 @@
 #import "URLImageQueue.h"
 #import <objc/runtime.h>
 #import "SysAsseist.h"
-
+#import "URLImageLayer.h"
 @interface URLImageView ()
 @property (nonatomic,assign)Class objIsa;
 @property (nonatomic,assign) NSOperation *operation;
+@property (nonatomic,copy)NSString *url;
 @end
 
 @implementation URLImageView
 @synthesize indexPath = _indexPath;
 @synthesize operation = _operation;
-
-
 -(void)urlImage:(NSString *)url
 {
     [self urlImage:url defaultIMG:@"defaultImage"];
@@ -28,30 +27,19 @@
 
 -(void)urlImage:(NSString *)url defaultIMG:(NSString *)img
 {
-    [self urlImage:url largeUrl:url defaultIMG:img];
+    [self loadAction:url defaultIMG:img data:nil];
 }
 
--(void)urlImage:(NSString *)url largeUrl:(NSString *)large defaultIMG:(NSString *)img
+-(void)loadAction:(NSString *)url defaultIMG:(NSString *)img data:(NSData *)data
 {
     [self cancelOperation];
     self.backgroundColor = [UIColor whiteColor];
     __weak URLImageView *imageView = self;
-    NSOperation *opertation = [URLImageQueue setOperationUrl:[url copy] defaultImageName:[img copy] netImageBlock:^(UIImage *image,BOOL isMemory) {
-        [imageView imageDone:image memory:isMemory];
+    self.url = url;
+    NSOperation *opertation = [URLImageQueue setOperation:self Url:[url copy] defaultImageName:[img copy] data:data netImageBlock:^(URLImageLayer *imageData,BOOL isMemory) {
+        [imageView imageDone:imageData memory:isMemory];
     }];
     self.operation = opertation;
-}
-
--(void)imageDone:(UIImage *)image memory:(BOOL)memory
-{
-    self.image = image;
-    if (!memory) {
-        self.alpha = 0;
-        __weak URLImageView *imageView = self;
-        [UIView animateWithDuration:0.5 animations:^{
-            imageView.alpha = 1;
-        }];
-    }
 }
 
 -(void)setOperation:(NSOperation *)operation
@@ -60,7 +48,11 @@
     _objIsa = object_getClass(_operation);
 }
 
-
+-(void)imageDone:(URLImageLayer *)imageData memory:(BOOL)memory
+{
+    [imageData load:self];
+    //    [imageData load:self animate:memory];
+}
 
 -(void)cancelOperation
 {
@@ -73,8 +65,16 @@
 {
     [self cancelOperation];
 #if !__has_feature(objc_arc)
+    [_url release];_url = nil;
     [_indexPath release];_indexPath = nil;
     [super dealloc];
 #endif
+}
+@end
+
+@implementation URLImageView (GIFImage)
+- (void)pauseGif
+{
+    [URLImageQueue pauseGif:self url:self.url];
 }
 @end

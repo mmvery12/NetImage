@@ -8,8 +8,14 @@
 
 #import "URLImageOperation.h"
 #import <objc/runtime.h>
-@implementation URLImageOperation
+#import "ImageDataPool.h"
 
+@implementation URLImageOperation
+@synthesize url = _url;
+@synthesize sblock = _sblock;
+@synthesize pblock = _pblock;
+@synthesize fblock = _fblock;
+@synthesize path = _path;
 -(void)start
 {
     [self getImage];
@@ -17,19 +23,20 @@
 
 -(void)getImage
 {
-    if (![self isCancelled]) {
-        NSString *url = self.url;
-        NSString *path = self.path;
-        if (![self isCancelled]) {
-            responseData = [NSMutableData data];
-            [self loadFromUrl:url savePath:path];
-        }
-    }
+    isFinish = YES;
+    if ([self isCancelled]) return;
+    NSString *url = self.url;
+    NSString *path = self.path;
+    isFinish = YES;
+    if ([self isCancelled]) return;
+    revdata = [NSMutableData data];
+    [self loadFromUrl:url savePath:path];
 }
 
 
 -(void)loadFromUrl:(id)url savePath:(NSString *)path
 {
+    isFinish = NO;
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     conn = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
 #if !__has_feature(objc_arc)
@@ -51,9 +58,6 @@
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
-    NSDictionary *dict = ((NSHTTPURLResponse *)response).allHeaderFields;
-    NSString *ContentType = [dict objectForKey:@"Content-Type"];
-    
     totalSize = response.expectedContentLength;
 }
 
@@ -62,25 +66,26 @@
     if (_pblock) {
         _pblock(data.length/totalSize);
     }
-    [responseData appendData:data];
+    [revdata appendData:data];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
     isFinish = YES;
-    UIImage *image = [self OriginImage:responseData];
+    [layer judgeData:revdata];
+    [ImageDataPool addImageURL:self.url data:layer];
     __weak URLImageOperation *oper = self;
-    if (![self isCancelled]&&image) {
+    if (![self isCancelled]) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [oper done:image];
+            [oper done:layer];
         });
     }
 }
 
--(void)done:(UIImage *)image
+-(void)done:(URLImageLayer *)responseDatas
 {
-    [responseData writeToFile:self.path atomically:YES];
-    if (self.sblock && image) _sblock(image,NO);
+    [revdata writeToFile:self.path atomically:YES];
+    if (self.sblock && responseDatas) _sblock(responseDatas,NO);
     isFinish = YES;
     CFRunLoopStop(loop);
 }
@@ -108,17 +113,6 @@
 -(BOOL)isConcurrent
 {
     return YES;
-}
-
--(UIImage *)OriginImage:(NSData *)data
-{
-    UIImage *image = [UIImage imageWithData:responseData];
-    CGSize size = image.size;
-    UIGraphicsBeginImageContext(size);
-    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return scaledImage;
 }
 
 - (void)dealloc

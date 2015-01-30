@@ -8,6 +8,7 @@
 
 #import "URLImageQueue.h"
 #import "ImageDataPool.h"
+
 #define KmaxConcurrentOperationCount 8
 @implementation URLImageQueue
 
@@ -22,6 +23,11 @@
         return queue;
     }
 }
++(void)pauseGif:(UIImageView *)imageView url:(NSString *)url
+{
+    URLImageLayer *memoryData = (id)[ImageDataPool getImageData:url];
+    [memoryData pause];
+}
 
 - (instancetype)init
 {
@@ -34,50 +40,31 @@
     return self;
 }
 
-+(NSOperation *)setOperationUrl:(NSString *)url defaultImageName:(NSString *)defaultName netImageBlock:(URLImageBlock)block
++(NSOperation *)setOperation:(UIImageView *)imageView Url:(NSString *)url defaultImageName:(NSString *)defaultName data:(NSData *)data netImageBlock:(URLImageBlock)block
 {
-    return [[URLImageQueue SingleURLImageQueue] queue:url defaultImageName:defaultName netImageBlock:block];
+    return [[URLImageQueue SingleURLImageQueue] queue:imageView url:url defaultImageName:defaultName data:data netImageBlock:block];
 }
 
--(NSOperation *)queue:(NSString *)url defaultImageName:(NSString *)defaultName netImageBlock:(URLImageBlock)block
+-(NSOperation *)queue:(UIImageView *)imageView url:(NSString *)url defaultImageName:(NSString *)defaultName data:(NSData *)hdata netImageBlock:(URLImageBlock)block
 {
-    if (!url||url.length==0) {
-        return nil;
-    }
+    if (!url||url.length==0) return nil;
 #if !__has_feature(objc_arc)
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 #endif
     URLImageOperation *fileOpertation = nil;
-    NSData *memoryData = [ImageDataPool getImageData:url];
+    URLImageLayer *memoryData = (id)[ImageDataPool getImageData:url];
     if (memoryData) {
-#if !__has_feature(objc_arc)
-        block([[[UIImage alloc] initWithData:memoryData] autorelease],YES);
-#else
-        block([[UIImage alloc] initWithData:memoryData],YES);
-#endif
+        block(memoryData,YES);
     }else
     {
         NSString *tempurl = [url stringByReplacingOccurrencesOfString:@"http://" withString:@""];
         NSMutableString *path = [NSMutableString stringWithString:[self getPath:tempurl]];
         NSData *data = [[NSData alloc] initWithContentsOfFile:path];
-        if (data) {
-#if !__has_feature(objc_arc)
-            block([[[UIImage alloc] initWithData:data] autorelease],NO);
-#else
-            block([[UIImage alloc] initWithData:data],YES);
-#endif
-            [ImageDataPool addImageURL:url data:data];
+        if (data||hdata) {
+            [self loadFromSandBox:data?data:hdata url:url block:block];
         }else
         {
-            fileOpertation = [[URLImageOperation alloc] init];
-            fileOpertation.url = url;
-            fileOpertation.sblock = block;
-            fileOpertation.path = path;
-            [self addOperation:fileOpertation];
-#if !__has_feature(objc_arc)
-            [fileOpertation release];
-#endif
-            block([UIImage imageNamed:defaultName],YES);
+            fileOpertation = [self loadFromNet:path url:url block:block];
         }
 #if !__has_feature(objc_arc)
         [data release];
@@ -86,6 +73,36 @@
 #if !__has_feature(objc_arc)
     Block_release(block);
     [pool drain];
+#endif
+    return fileOpertation;
+}
+
+-(void)loadFromSandBox:(NSData *)data url:(NSString *)url block:(URLImageBlock)block
+{
+    URLImageLayer *imageData = [URLImageLayer layer];
+    [imageData judgeData:data];
+    block(imageData,YES);
+    [ImageDataPool addImageURL:url data:imageData];
+//#if !__has_feature(objc_arc)
+//    [imageData release];
+//#endif
+}
+
+-(URLImageOperation *)loadFromNet:(NSString *)path url:(NSString *)url block:(URLImageBlock)block
+{
+    URLImageOperation *fileOpertation = nil;
+    fileOpertation = [[URLImageOperation alloc] init];
+    fileOpertation.url = url;
+    fileOpertation.sblock = block;
+    fileOpertation.path = path;
+    [self addOperation:fileOpertation];
+#if !__has_feature(objc_arc)
+    [fileOpertation release];
+#endif
+//    URLImageData *imageData = [URLImageData Default];
+//    block(imageData,NO);
+#if !__has_feature(objc_arc)
+    [imageData release];
 #endif
     return fileOpertation;
 }
@@ -101,6 +118,9 @@
 
 -(NSMutableString *)getPath:(NSString *)url
 {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:url]) {
+        return [NSMutableString stringWithString:url];
+    }
     NSRange string = [url rangeOfString:@"/" options:NSBackwardsSearch];
     NSString *From = [url substringFromIndex:string.location+1];
     NSString *to = [[url substringToIndex:string.location] stringByReplacingOccurrencesOfString:@"." withString:@"/"];

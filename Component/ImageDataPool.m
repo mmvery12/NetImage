@@ -2,7 +2,7 @@
 //  ImageDataPool.m
 //  XF9H-HD
 //
-//  Created by liyuchang on 14-11-10.
+//  Created by liyuchang on 13-11-10.
 //  Copyright (c) 2014年 com.Vacn. All rights reserved.
 //
 
@@ -30,16 +30,18 @@
     }
     return self;
 }
-+(void)addImageURL:(NSString *)url data:(NSData *)data
+
++(void)addImageURL:(NSString *)url data:(URLImageLayer *)data
 {
     [[ImageDataPool Share] imageurl:url data:data];
 }
-+(NSData *)getImageData:(NSString *)url
+
++(URLImageLayer *)getImageData:(NSString *)url
 {
     return [[ImageDataPool Share] getData:url];
 }
 
--(void)imageurl:(NSString *)url data:(NSData *)data
+-(void)imageurl:(NSString *)url data:(URLImageLayer *)data
 {
     @synchronized(_dict)
     {
@@ -47,7 +49,7 @@
     }
 }
 
--(NSData *)getData:(NSString *)url
+-(URLImageLayer *)getData:(NSString *)url
 {
     @synchronized(_dict)
     {

@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-typedef void (^URLImageBlock)(UIImage *image,BOOL isMemory);
+#import "URLImageLayer.h"
+typedef void (^URLImageBlock)(URLImageLayer *image,BOOL isMemory);
 typedef void (^URLImagePercent)(CGFloat percent);
 typedef void (^FaileBlock)();
 @interface URLImageOperation : NSOperation<NSURLConnectionDataDelegate>
@@ -16,10 +17,10 @@ typedef void (^FaileBlock)();
     Class objc;
     NSURLConnection *conn;
     BOOL isFinish;
-    NSMutableData *responseData;
+    NSMutableData *revdata;
     CFRunLoopRef loop;
     long long totalSize;
-    
+    URLImageLayer *layer;
 }
 @property (nonatomic,copy)NSString *url;
 @property (nonatomic,copy)URLImageBlock sblock;
