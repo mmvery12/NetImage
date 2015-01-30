@@ -15,5 +15,5 @@
 @end
 
 @interface URLImageView (GIFImage)
-- (void)pauseGif;
+- (void)viewWillDismissPauseGif;
 @end

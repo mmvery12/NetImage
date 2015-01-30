@@ -73,8 +73,8 @@
 @end
 
 @implementation URLImageView (GIFImage)
-- (void)pauseGif
+- (void)viewWillDismissPauseGif
 {
-    [URLImageQueue pauseGif:self url:self.url];
+    [URLImageQueue viewWillDismissPauseGif:self url:self.url];
 }
 @end

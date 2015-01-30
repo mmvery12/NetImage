@@ -7,7 +7,7 @@
 //
 
 #import "URLImageLayer.h"
-
+#import <objc/runtime.h>
 #import "URLImage.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -27,6 +27,7 @@
 const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
 
 @synthesize displayLink = _displayLink;
+
 -(void)judgeData:(NSData *)data
 {
     URLImage *image = [[URLImage alloc] initWithData:data];
@@ -55,7 +56,12 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
 - (void)load:(UIImageView *)imageView
 {
     self.imageView = imageView;
-    if (![self.imageView.layer.sublayers containsObject:self]) [self.imageView.layer addSublayer:self];
+    for (CALayer *layer in self.imageView.layer.sublayers) {
+        if ([layer isKindOfClass:object_getClass(self)]) {
+            [layer removeFromSuperlayer];
+        }
+    }
+    [self.imageView.layer addSublayer:self];
     if (!_loaded) {
         self.frame = imageView.bounds;
         _loaded = YES;

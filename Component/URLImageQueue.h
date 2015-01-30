@@ -16,6 +16,6 @@ typedef void (^FileBlock)();
     dispatch_queue_t myDispatch;
 }
 +(id)SingleURLImageQueue;
-+(void)pauseGif:(UIImageView *)imageView url:(NSString *)url;
++(void)viewWillDismissPauseGif:(UIImageView *)imageView url:(NSString *)url;
 +(NSOperation *)setOperation:(UIImageView *)imageView Url:(NSString *)url defaultImageName:(NSString *)defaultName data:(NSData *)data netImageBlock:(URLImageBlock)block;
 @end

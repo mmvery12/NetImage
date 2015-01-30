@@ -23,7 +23,7 @@
         return queue;
     }
 }
-+(void)pauseGif:(UIImageView *)imageView url:(NSString *)url
++(void)viewWillDismissPauseGif:(UIImageView *)imageView url:(NSString *)url
 {
     URLImageLayer *memoryData = (id)[ImageDataPool getImageData:url];
     [memoryData pause];
