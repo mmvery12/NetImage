@@ -16,15 +16,16 @@
 #define FLT_EPSILON __FLT_EPSILON__
 #endif
 
-void getFrameInfo(CFDataRef url, NSMutableArray *frames, NSTimeInterval *delayTimes, CGFloat *totalTime,CGFloat *gifWidth, CGFloat *gifHeight)
+void getFrameInfo(CFDataRef url, NSMutableArray *frames, NSTimeInterval *delayTimes, NSTimeInterval *totalTime,CGFloat *gifWidth, CGFloat *gifHeight)
 {
     CGImageSourceRef gifSource = CGImageSourceCreateWithData(url, NULL);
     size_t frameCount = CGImageSourceGetCount(gifSource);
     for (size_t i = 0; i < frameCount; ++i) {
         CGImageRef frame = CGImageSourceCreateImageAtIndex(gifSource, i, NULL);
         [frames addObject:(__bridge id)frame];
-        CGImageRelease(frame);
-        NSDictionary *dict = (__bridge NSDictionary*)CGImageSourceCopyPropertiesAtIndex(gifSource, i, NULL);
+        
+        CFDictionaryRef sourceDict = CGImageSourceCopyPropertiesAtIndex(gifSource, i, NULL);
+        NSDictionary *dict = [NSDictionary dictionaryWithDictionary:(__bridge NSDictionary *)(sourceDict)];
         if (gifWidth != NULL && gifHeight != NULL) {
             *gifWidth = [[dict valueForKey:(NSString*)kCGImagePropertyPixelWidth] floatValue];
             *gifHeight = [[dict valueForKey:(NSString*)kCGImagePropertyPixelHeight] floatValue];
@@ -34,7 +35,10 @@ void getFrameInfo(CFDataRef url, NSMutableArray *frames, NSTimeInterval *delayTi
         if (totalTime) {
             *totalTime = *totalTime + [[gifDict valueForKey:(NSString*)kCGImagePropertyGIFDelayTime] floatValue];
         }
+        CFRelease(sourceDict);
+        CGImageRelease(frame);
     }
+    CFRelease(gifSource);
 }
 
 inline static NSTimeInterval CGImageSourceGetGifFrameDelay(CGImageSourceRef imageSource, NSUInteger index)
@@ -78,7 +82,7 @@ inline static BOOL CGImageSourceContainsAnimatedGif(CGImageSourceRef imageSource
 
 @property (nonatomic, readwrite) NSMutableArray *images;
 @property (nonatomic, readwrite) NSTimeInterval *frameDurations;
-@property (nonatomic, readwrite) NSTimeInterval totalDuration;
+@property (nonatomic, readwrite) NSTimeInterval *totalDuration;
 @property (nonatomic, readwrite) NSUInteger loopCount;
 @property (nonatomic, readwrite) CGImageSourceRef incrementalSource;
 
@@ -96,31 +100,26 @@ static NSUInteger _prefetchedNum = 10;
 @synthesize images;
 - (id)initWithData:(NSData *)data
 {
-    return [self initWithData:data scale:1.0f];
-}
-
-- (id)initWithData:(NSData *)data scale:(CGFloat)scale
-{
     if (!data) {
         return nil;
     }
     CGImageSourceRef imageSource = CGImageSourceCreateWithData((__bridge CFDataRef)(data), NULL);
     if (CGImageSourceContainsAnimatedGif(imageSource)) {
-        self = [self initWithCGImageSource:imageSource scale:scale :data];
+        self = [self initWithCGImageSource:imageSource scale:NO :data];
+        _imageSourceRef = imageSource;
+        CFRetain(imageSource);
     } else {
-        if (scale == 1.0f) {
-            self =  [super initWithData:data];
-        } else {
-            self = [super initWithData:data scale:scale];
-        }
+        CGImageRef ref = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+        CGFloat percent = 100./data.length;
+        self = [super initWithCGImage:ref scale:percent>1?1:percent orientation:UIImageOrientationUp];
+        CFRelease(ref);
     }
-    
     if (imageSource) {
         CFRelease(imageSource);
     }
-    
     return self;
 }
+
 
 - (id)initWithCGImageSource:(CGImageSourceRef)imageSource scale:(CGFloat)scale :(NSData *)data
 {
@@ -128,9 +127,6 @@ static NSUInteger _prefetchedNum = 10;
     if (!imageSource || !self) {
         return nil;
     }
-    
-    CFRetain(imageSource);
-    
     NSUInteger numberOfFrames = CGImageSourceGetCount(imageSource);
     
     NSDictionary *imageProperties = CFBridgingRelease(CGImageSourceCopyProperties(imageSource, NULL));
@@ -143,8 +139,8 @@ static NSUInteger _prefetchedNum = 10;
     CFDataRef dataref = CFDataCreate(CFAllocatorGetDefault(), [data bytes], data.length);
     CGFloat gifWidth;
     CGFloat gifHeight;
-    getFrameInfo(dataref, self.images, self.frameDurations, &_totalDuration, &gifWidth, &gifHeight);
-
+    getFrameInfo(dataref, self.images, self.frameDurations, _totalDuration, &gifWidth, &gifHeight);
+    CFRelease(dataref);
     //CFTimeInterval start = CFAbsoluteTimeGetCurrent();
     // Load first frame
     NSUInteger num = MIN(_prefetchedNum, numberOfFrames);
@@ -153,9 +149,6 @@ static NSUInteger _prefetchedNum = 10;
         [self.images replaceObjectAtIndex:i withObject:[UIImage imageWithCGImage:image scale:scale orientation:UIImageOrientationUp]];
         CFRelease(image);
     }
-    _imageSourceRef = imageSource;
-    CFRetain(_imageSourceRef);
-    CFRelease(imageSource);
     
     _scale = scale;
     readFrameQueue = dispatch_queue_create("com.ronnie.gifreadframe", DISPATCH_QUEUE_SERIAL);
@@ -234,7 +227,7 @@ static NSUInteger _prefetchedNum = 10;
 
 - (NSTimeInterval)duration
 {
-    return self.images ? self.totalDuration : [super duration];
+    return self.images ? *self.totalDuration : [super duration];
 }
 
 - (void)dealloc {
@@ -242,18 +235,10 @@ static NSUInteger _prefetchedNum = 10;
         CFRelease(_imageSourceRef);
     }
     free(_frameDurations);
+    free(_totalDuration);
     if (_incrementalSource) {
         CFRelease(_incrementalSource);
     }
-}
-
--(CGImageRef)graphicImage:(NSData *)data
-{
-    CGImageSourceRef source = CGImageSourceCreateWithData(CFDataCreate(CFAllocatorGetDefault(), [data bytes], data.length), NULL);
-    CGImageRef frame = CGImageSourceCreateImageAtIndex(source, 0, NULL);
-    CGImageRelease(frame);
-    CFRelease(source);
-    return frame;
 }
 
 @end

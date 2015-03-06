@@ -7,14 +7,10 @@
 //
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
-#import "URLImageLayer.h"
+#import "URLImageObjc.h"
 #import "URLImageOperation.h"
 typedef void (^FileBlock)();
 @interface URLImageQueue : NSOperationQueue
-{
-    NSMutableString *cachePath;
-    dispatch_queue_t myDispatch;
-}
 +(id)SingleURLImageQueue;
 +(void)viewWillDismissPauseGif:(UIImageView *)imageView url:(NSString *)url;
 +(NSOperation *)setOperation:(UIImageView *)imageView Url:(NSString *)url defaultImageName:(NSString *)defaultName data:(NSData *)data netImageBlock:(URLImageBlock)block;

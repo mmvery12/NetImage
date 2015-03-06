@@ -7,11 +7,11 @@
 //
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
-#import "URLImageLayer.h"
+#import "URLImageObjc.h"
 @interface ImageDataPool : NSObject
 {
     NSMutableDictionary *_dict;
 }
-+(void)addImageURL:(NSString *)url data:(URLImageLayer *)data;
-+(URLImageLayer *)getImageData:(NSString *)url;
++(void)addImageURL:(NSString *)url data:(URLImageObjc *)data;
++(URLImageObjc *)getImageData:(NSString *)url;
 @end

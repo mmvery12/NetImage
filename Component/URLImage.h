@@ -10,6 +10,6 @@
 
 @interface URLImage : UIImage
 @property (nonatomic, readonly) NSTimeInterval *frameDurations;
-@property (nonatomic, readonly) NSTimeInterval totalDuration;
+@property (nonatomic, readonly) NSTimeInterval *totalDuration;
 @property (nonatomic, readonly) NSUInteger loopCount;
 @end

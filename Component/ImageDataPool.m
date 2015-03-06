@@ -31,17 +31,17 @@
     return self;
 }
 
-+(void)addImageURL:(NSString *)url data:(URLImageLayer *)data
++(void)addImageURL:(NSString *)url data:(URLImageObjc *)data
 {
     [[ImageDataPool Share] imageurl:url data:data];
 }
 
-+(URLImageLayer *)getImageData:(NSString *)url
++(URLImageObjc *)getImageData:(NSString *)url
 {
     return [[ImageDataPool Share] getData:url];
 }
 
--(void)imageurl:(NSString *)url data:(URLImageLayer *)data
+-(void)imageurl:(NSString *)url data:(URLImageObjc *)data
 {
     @synchronized(_dict)
     {
@@ -49,7 +49,7 @@
     }
 }
 
--(URLImageLayer *)getData:(NSString *)url
+-(URLImageObjc *)getData:(NSString *)url
 {
     @synchronized(_dict)
     {

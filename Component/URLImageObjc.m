@@ -1,34 +1,52 @@
 //
-//  URLImageLayer.m
+//  URLimageObjc.m
 //  FrameWork
 //
 //  Created by liyuchang on 15-1-30.
 //  Copyright (c) 2015年 com.Vacn. All rights reserved.
 //
 
-#import "URLImageLayer.h"
+#import "URLImageObjc.h"
 #import <objc/runtime.h>
 #import "URLImage.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface URLImageLayer ()
+@interface URLImageObjc ()
 @property (nonatomic, assign) UIImageView *imageView;
 @property (nonatomic, strong) URLImage *animatedImage;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic) NSTimeInterval accumulator;
 @property (nonatomic) NSUInteger currentFrameIndex;
-@property (nonatomic, strong) UIImage* currentFrame;
+@property (nonatomic, assign) UIImage* currentFrame;
 @property (nonatomic) NSUInteger loopCountdown;
 @property (nonatomic,assign)BOOL loaded;
 @end
 
-@implementation URLImageLayer
+@implementation URLImageObjc
 @synthesize animatedImage = _animatedImage;
 const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
-
 @synthesize displayLink = _displayLink;
 
--(void)judgeData:(NSData *)data
+- (instancetype)initImageObjc:(NSData *)data
+{
+    self = [super init];
+    if (self) {
+        [self parseData:data];
+    }
+    return self;
+}
+
+- (instancetype)initDefaultObjc:(NSString *)img
+{
+    self = [super init];
+    if (self) {
+        [self parseData2:img];
+    }
+    return self;
+}
+
+
+-(void)parseData:(NSData *)data
 {
     URLImage *image = [[URLImage alloc] initWithData:data];
     self.animatedImage = image;
@@ -38,12 +56,23 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
 #endif
 }
 
+-(void)parseData2:(NSString *)data
+{
+    URLImage *image =(id) [URLImage imageNamed:data];
+    self.animatedImage = image;
+    self.currentFrameIndex = 0;
+}
+
 - (CADisplayLink *)displayLink
 {
-    if (self.superlayer) {
-        if (!_displayLink && self.animatedImage) {
+    if (self.imageView) {
+        if (!_displayLink && self.animatedImage.images.count>1) {
             _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(changeKeyframe:)];
             [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        }else
+        {
+            [_displayLink invalidate];
+            _displayLink = nil;
         }
     } else {
         [_displayLink invalidate];
@@ -52,18 +81,10 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
     return _displayLink;
 }
 
-
-- (void)load:(UIImageView *)imageView
+- (void)showImage:(UIImageView *)imageView
 {
     self.imageView = imageView;
-    for (CALayer *layer in self.imageView.layer.sublayers) {
-        if ([layer isKindOfClass:object_getClass(self)]) {
-            [layer removeFromSuperlayer];
-        }
-    }
-    [self.imageView.layer addSublayer:self];
     if (!_loaded) {
-        self.frame = imageView.bounds;
         _loaded = YES;
         self.currentFrameIndex = 0;
         self.loopCountdown = 0;
@@ -78,7 +99,7 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
     {
         self.currentFrame = self.animatedImage;
     }
-    [self displayLayer:self];
+    [self displayLayer];
 }
 
 
@@ -86,11 +107,12 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
 {
     return [self.imageView isAnimating] || (self.displayLink && !self.displayLink.isPaused);
 }
+
 -(void)pause
 {
-    [self removeFromSuperlayer];
     [self stopAnimating];
 }
+
 - (void)stopAnimating
 {
     if (!self.animatedImage) {
@@ -99,7 +121,6 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
     }
     
     self.loopCountdown = 0;
-    
     self.displayLink.paused = YES;
 }
 
@@ -134,15 +155,21 @@ const NSTimeInterval kMaxTimeStep = 1; // note: To avoid spiral-o-death
         }
         self.currentFrameIndex = MIN(self.currentFrameIndex, [self.animatedImage.images count] - 1);
         self.currentFrame = self.animatedImage.images[self.currentFrameIndex];
-        [self displayLayer:self];
+        [self displayLayer];
     }
 }
 
--(void)displayLayer:(CALayer *)layer
+-(void)displayLayer
 {
-    if(self.currentFrame && [self.currentFrame isKindOfClass:[UIImage class]])
-        layer.contents = (__bridge id)([self.currentFrame CGImage]);
+    self.imageView.image = [self.currentFrame copy];
 }
 
+- (void)dealloc
+{
+    if (_animatedImage==nil) {
+        
+    }else
+        _animatedImage = nil;
+}
 
 @end

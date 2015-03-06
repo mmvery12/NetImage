@@ -6,15 +6,17 @@
 //  Copyright (c) 2014年 Mac. All rights reserved.
 //
 
+  
 #import "URLImageView.h"
 #import "URLImageQueue.h"
 #import <objc/runtime.h>
 #import "SysAsseist.h"
-#import "URLImageLayer.h"
+#import "URLImageObjc.h"
 @interface URLImageView ()
 @property (nonatomic,assign)Class objIsa;
 @property (nonatomic,assign) NSOperation *operation;
 @property (nonatomic,copy)NSString *url;
+@property (nonatomic,assign)URLImageObjc *imageObjc;
 @end
 
 @implementation URLImageView
@@ -22,6 +24,7 @@
 @synthesize operation = _operation;
 -(void)urlImage:(NSString *)url
 {
+    
     [self urlImage:url defaultIMG:@"defaultImage"];
 }
 
@@ -33,10 +36,9 @@
 -(void)loadAction:(NSString *)url defaultIMG:(NSString *)img data:(NSData *)data
 {
     [self cancelOperation];
-    self.backgroundColor = [UIColor whiteColor];
-    __weak URLImageView *imageView = self;
     self.url = url;
-    NSOperation *opertation = [URLImageQueue setOperation:self Url:[url copy] defaultImageName:[img copy] data:data netImageBlock:^(URLImageLayer *imageData,BOOL isMemory) {
+    __weak URLImageView *imageView = self;
+    NSOperation *opertation = [URLImageQueue setOperation:self Url:[url copy] defaultImageName:[img copy] data:data netImageBlock:^(URLImageObjc *imageData,BOOL isMemory) {
         [imageView imageDone:imageData memory:isMemory];
     }];
     self.operation = opertation;
@@ -48,16 +50,21 @@
     _objIsa = object_getClass(_operation);
 }
 
--(void)imageDone:(URLImageLayer *)imageData memory:(BOOL)memory
+-(void)imageDone:(URLImageObjc *)imageData memory:(BOOL)memory
 {
-    [imageData load:self];
-    //    [imageData load:self animate:memory];
+    if ([imageData isEqual:self.imageObjc]) {
+        return;
+    }
+    [imageData showImage:self];
 }
 
 -(void)cancelOperation
 {
     if (_objIsa == object_getClass(_operation) && self.operation) {
         [self.operation cancel];
+    }else
+    {
+    
     }
 }
 
@@ -76,5 +83,21 @@
 - (void)viewWillDismissPauseGif
 {
     [URLImageQueue viewWillDismissPauseGif:self url:self.url];
+}
+@end
+
+@implementation URLImageView (Adapter)
+
+-(void)urlImage:(NSString *)url scale:(BOOL)scale
+{
+    [self urlImage:url];
+}
+-(void)urlImage:(NSString *)url defaultIMG:(NSString *)img scale:(BOOL)scale
+{
+    [self urlImage:url defaultIMG:img];
+}
+-(void)urlImage:(NSString *)url largeUrl:(NSString *)large defaultIMG:(NSString *)img scale:(BOOL)scale
+{
+    [self urlImage:url defaultIMG:img];
 }
 @end

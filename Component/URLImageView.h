@@ -17,3 +17,9 @@
 @interface URLImageView (GIFImage)
 - (void)viewWillDismissPauseGif;
 @end
+
+@interface URLImageView (Adapter)
+-(void)urlImage:(NSString *)url scale:(BOOL)scale;
+-(void)urlImage:(NSString *)url defaultIMG:(NSString *)img scale:(BOOL)scale;
+-(void)urlImage:(NSString *)url largeUrl:(NSString *)large defaultIMG:(NSString *)img scale:(BOOL)scale;
+@end
